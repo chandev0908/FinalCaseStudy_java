@@ -548,14 +548,12 @@ public class mainUI {
 						}
 						docs.add(tbl);
 						printed = true;
-
+						docs.close();
 					} catch (FileNotFoundException exs) {
 						System.out.println("Error " + exs);
 					} catch (DocumentException exss) {
 						System.out.println("Error " + exss);
 					}
-
-					docs.close();
 				}
 			}
 
