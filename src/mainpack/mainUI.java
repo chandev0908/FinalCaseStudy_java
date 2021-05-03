@@ -50,9 +50,11 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.toedter.calendar.JDateChooser;
+
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.border.MatteBorder;
+import java.awt.Dimension;
 
 public class mainUI {
 
@@ -74,10 +76,12 @@ public class mainUI {
 	public File tempContainerFile;
 	public String tempContainerFilePath = "";
 	public int idI = 1;
+	public int studentCounts = 0;
 	public String emailFrom = "";
 	public String passFrom = "";
 	public boolean printed = false;
-	public boolean darkMode = false;
+	public boolean darkMode = true;
+	public String pdfFileName = "";
 	private JTextField studidTxt;
 	public String[] colorarr = { "#15181c", "#000000" };
 
@@ -110,10 +114,27 @@ public class mainUI {
 	private void initialize() {
 		// Main Frame
 		frame = new JFrame();
-		frame.setTitle("ID Generator");
+		frame.setMinimumSize(new Dimension(900, 650));
+		frame.setTitle("Student Permission Generator");
 		frame.setBounds(100, 100, 1036, 729);
 		frame.setLocationRelativeTo(null);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+		// Listener to Window Close button
+
+		frame.addWindowListener(new java.awt.event.WindowAdapter() {
+			@Override
+			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+				if (!printed) {
+					if (JOptionPane.showConfirmDialog(null, "Are you sure you want to close without printing PDF?",
+							"WARNING", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						System.exit(0);
+					}
+				} else {
+					System.exit(0);
+				}
+			}
+		});
 		// Menubar for changing email
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
@@ -129,7 +150,7 @@ public class mainUI {
 		});
 		mnNewMenu.add(mntmNewMenuItem);
 		JMenuItem mntmNewMenuItem234 = new JMenuItem("Dark Mode");
-
+		mntmNewMenuItem234.setBackground(Color.decode("#a4a4a4"));
 		mnNewMenu.add(mntmNewMenuItem234);
 
 		JPanel panel = new JPanel();
@@ -143,7 +164,7 @@ public class mainUI {
 		panel.add(panel_2);
 		panel_2.setLayout(new GridLayout(8, 1, 5, 5));
 
-		JLabel fnamelabel = new JLabel("First Name");
+		JLabel fnamelabel = new JLabel("Full Name (Lastname, FirstName, Middle name)");
 		fnamelabel.setForeground(Color.WHITE);
 		fnamelabel.setFont(new Font("Tahoma", Font.BOLD, 13));
 		panel_2.add(fnamelabel);
@@ -152,7 +173,7 @@ public class mainUI {
 		fnameText.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				if(!darkMode){
+				if (darkMode) {
 					fnameText.setBackground(Color.BLACK);
 					fnameText.setBorder(new MatteBorder(1, 1, 1, 1, Color.decode("#1DA1F2")));
 				}
@@ -160,7 +181,7 @@ public class mainUI {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				if(!darkMode){
+				if (darkMode) {
 					fnameText.setBorder(null);
 					fnameText.setBackground(Color.decode("#657786"));
 				}
@@ -181,7 +202,7 @@ public class mainUI {
 		studidTxt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				if(!darkMode){
+				if (darkMode) {
 					studidTxt.setBackground(Color.BLACK);
 					studidTxt.setBorder(new MatteBorder(1, 1, 1, 1, Color.decode("#1DA1F2")));
 				}
@@ -189,7 +210,7 @@ public class mainUI {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				if(!darkMode){
+				if (darkMode) {
 					studidTxt.setBorder(null);
 					studidTxt.setBackground(Color.decode("#657786"));
 				}
@@ -248,7 +269,7 @@ public class mainUI {
 		emailText.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				if(!darkMode){
+				if (darkMode) {
 					emailText.setBackground(Color.BLACK);
 					emailText.setBorder(new MatteBorder(1, 1, 1, 1, Color.decode("#1DA1F2")));
 				}
@@ -256,7 +277,7 @@ public class mainUI {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				if(!darkMode){
+				if (darkMode) {
 					emailText.setBorder(null);
 					emailText.setBackground(Color.decode("#657786"));
 				}
@@ -277,7 +298,7 @@ public class mainUI {
 		phoneText.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				if(!darkMode){
+				if (darkMode) {
 					phoneText.setBackground(Color.BLACK);
 					phoneText.setBorder(new MatteBorder(1, 1, 1, 1, Color.decode("#1DA1F2")));
 				}
@@ -285,7 +306,7 @@ public class mainUI {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				if(!darkMode){
+				if (darkMode) {
 					phoneText.setBorder(null);
 					phoneText.setBackground(Color.decode("#657786"));
 				}
@@ -475,59 +496,67 @@ public class mainUI {
 		lblNewLabel_5.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				String path = "";
-				JFileChooser j = new JFileChooser();
-				j.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				j.setSelectedFile(new File(".pdf"));
-				int x = j.showSaveDialog(j);
-				if (x == JFileChooser.APPROVE_OPTION) {
-					path = j.getSelectedFile().getPath();
-				}
-				com.itextpdf.text.Document docs = new com.itextpdf.text.Document(PageSize.A4);
-
-				try {
-					PdfWriter.getInstance(docs, new FileOutputStream(path + "\\permitsutdentlist.pdf"));
-					docs.open();
-
-					PdfPTable tbl = new PdfPTable(7);
-					tbl.setTotalWidth(PageSize.A4.getWidth());
-					tbl.setLockedWidth(true);
-
-					tbl.addCell("Full Name");
-					tbl.addCell("Course");
-					tbl.addCell("Student ID");
-					tbl.addCell("Permit Code");
-					tbl.addCell("Permit Availability");
-					tbl.addCell("Email");
-					tbl.addCell("Phone #");
-
-					for (int ij = 0; ij < fName.size(); ij++) {
-						String fnames = fName.get(ij).toString();
-						String studids = studentID.get(ij).toString();
-						String emails = email.get(ij).toString();
-						String pcodes = permitCode.get(ij).toString();
-						String pavails = permitAvailability.get(ij).toString();
-						String courses = course.get(ij).toString();
-						String phones = phoneNum.get(ij).toString();
-
-						tbl.addCell(fnames);
-						tbl.addCell(courses);
-						tbl.addCell(studids);
-						tbl.addCell(pcodes);
-						tbl.addCell(pavails);
-						tbl.addCell(emails);
-						tbl.addCell(phones);
+				if (pdfFileName.isBlank() || pdfFileName.isEmpty()) {
+					pdfFileName = JOptionPane.showInputDialog(null, "Input the pdf file name",
+							"INPUT THE FILE NAME FIRST!", JOptionPane.WARNING_MESSAGE);
+					if (pdfFileName == null) {
+						pdfFileName = "";
 					}
-					docs.add(tbl);
-					printed = true;
+				} else {
+					String path = "";
+					JFileChooser j = new JFileChooser();
+					j.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					j.setSelectedFile(new File(".pdf"));
+					int x = j.showSaveDialog(j);
+					if (x == JFileChooser.APPROVE_OPTION) {
+						path = j.getSelectedFile().getPath();
+					}
+					com.itextpdf.text.Document docs = new com.itextpdf.text.Document(PageSize.A4);
 
-				} catch (FileNotFoundException exs) {
-					System.out.println("Error " + exs);
-				} catch (DocumentException exss) {
-					System.out.println("Error " + exss);
+					try {
+						PdfWriter.getInstance(docs, new FileOutputStream(path + "\\" + pdfFileName + ".pdf"));
+						docs.open();
+
+						PdfPTable tbl = new PdfPTable(7);
+						tbl.setTotalWidth(PageSize.A4.getWidth());
+						tbl.setLockedWidth(true);
+
+						tbl.addCell("Full Name");
+						tbl.addCell("Course");
+						tbl.addCell("Student ID");
+						tbl.addCell("Permit Code");
+						tbl.addCell("Permit Availability");
+						tbl.addCell("Email");
+						tbl.addCell("Phone #");
+
+						for (int ij = 0; ij < fName.size(); ij++) {
+							String fnames = fName.get(ij).toString();
+							String studids = studentID.get(ij).toString();
+							String emails = email.get(ij).toString();
+							String pcodes = permitCode.get(ij).toString();
+							String pavails = permitAvailability.get(ij).toString();
+							String courses = course.get(ij).toString();
+							String phones = phoneNum.get(ij).toString();
+
+							tbl.addCell(fnames);
+							tbl.addCell(courses);
+							tbl.addCell(studids);
+							tbl.addCell(pcodes);
+							tbl.addCell(pavails);
+							tbl.addCell(emails);
+							tbl.addCell(phones);
+						}
+						docs.add(tbl);
+						printed = true;
+
+					} catch (FileNotFoundException exs) {
+						System.out.println("Error " + exs);
+					} catch (DocumentException exss) {
+						System.out.println("Error " + exss);
+					}
+
+					docs.close();
 				}
-
-				docs.close();
 			}
 
 			@Override
@@ -561,6 +590,7 @@ public class mainUI {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (textChecker()) {
+					studentCounts++;
 					String tfName = fnameText.getText();
 					String tcourse = coursecomboBox.getSelectedItem().toString();
 					String studId = studidTxt.getText();
@@ -569,7 +599,7 @@ public class mainUI {
 					String permitCd = randomCode();
 					String temail = emailText.getText();
 					String phone = phoneText.getText();
-					studCounts.setText("Student Counts: " + idI);
+					studCounts.setText("Student Counts: " + studentCounts);
 					Object[] temp = { idI, tfName, tcourse, studId, permitCd, permitAvail, temail, phone };
 					tableModel.addRow(temp);
 					fName.add(tfName);
@@ -587,8 +617,8 @@ public class mainUI {
 		});
 		mntmNewMenuItem234.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (!darkMode) {
-					mntmNewMenuItem234.setBackground(Color.decode("#a4a4a4"));
+				if (darkMode) {
+					mntmNewMenuItem234.setBackground(new Color(240, 240, 240));
 					panel.setBackground(null);
 					panel_2.setBackground(null);
 					panel_2_1.setBackground(null);
@@ -615,9 +645,9 @@ public class mainUI {
 					studidTxt.setBorder(new MatteBorder(1, 1, 1, 1, Color.BLACK));
 					phoneText.setBorder(new MatteBorder(1, 1, 1, 1, Color.BLACK));
 					emailText.setBorder(new MatteBorder(1, 1, 1, 1, Color.BLACK));
-					darkMode = true;
+					darkMode = false;
 				} else {
-					mntmNewMenuItem234.setBackground(new Color(240, 240, 240));
+					mntmNewMenuItem234.setBackground(Color.decode("#a4a4a4"));
 					panel.setBackground(Color.decode("#14171A"));
 					panel_2.setBackground(Color.decode("#14171A"));
 					panel_2_1.setBackground(Color.decode("#14171A"));
@@ -640,7 +670,7 @@ public class mainUI {
 					coursecomboBox.setBackground(Color.decode("#657786"));
 					phoneText.setBackground(Color.decode("#657786"));
 					emailText.setBackground(Color.decode("#657786"));
-					darkMode = false;
+					darkMode = true;
 				}
 			}
 		});
@@ -660,6 +690,8 @@ public class mainUI {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
+					studentCounts--;
+					studCounts.setText("S");
 					int tablerow = table_1.getSelectedRow();
 					Object tableid = tableModel.getValueAt(tablerow, 0);
 					tableModel.removeRow(tablerow);
@@ -671,7 +703,7 @@ public class mainUI {
 					course.remove(tablerow);
 					phoneNum.remove(tablerow);
 					filepath.remove(tablerow);
-					
+
 					JOptionPane.showMessageDialog(null, "ID " + tableid + ", has been removed in the list");
 				} catch (Exception as) {
 					JOptionPane.showMessageDialog(null, "Invalid cannot do this action");
@@ -703,8 +735,6 @@ public class mainUI {
 		public void getResponse(String m, String p) {
 			emailFrom = m;
 			passFrom = p;
-			System.out.println(emailFrom);
-			System.out.println(passFrom);
 		}
 
 	}
