@@ -44,11 +44,6 @@ import javax.swing.JComboBox;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.ImageIcon;
 import java.awt.Cursor;
-
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 import com.toedter.calendar.JDateChooser;
 
 import java.awt.event.FocusAdapter;
@@ -503,67 +498,18 @@ public class mainUI {
 						pdfFileName = "";
 					}
 				} else {
-					String path = "";
-					JFileChooser j = new JFileChooser();
-					j.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					j.setSelectedFile(new File(".pdf"));
-					int x = j.showSaveDialog(j);
-					if (x == JFileChooser.APPROVE_OPTION) {
-						path = j.getSelectedFile().getPath();
-					}
-					com.itextpdf.text.Document docs = new com.itextpdf.text.Document(PageSize.A4);
-
-					try {
-						PdfWriter.getInstance(docs, new FileOutputStream(path + "\\" + pdfFileName + ".pdf"));
-						docs.open();
-
-						PdfPTable tbl = new PdfPTable(7);
-						tbl.setTotalWidth(PageSize.A4.getWidth());
-						tbl.setLockedWidth(true);
-
-						tbl.addCell("Full Name");
-						tbl.addCell("Course");
-						tbl.addCell("Student ID");
-						tbl.addCell("Permit Code");
-						tbl.addCell("Permit Availability");
-						tbl.addCell("Email");
-						tbl.addCell("Phone #");
-
-						for (int ij = 0; ij < fName.size(); ij++) {
-							String fnames = fName.get(ij).toString();
-							String studids = studentID.get(ij).toString();
-							String emails = email.get(ij).toString();
-							String pcodes = permitCode.get(ij).toString();
-							String pavails = permitAvailability.get(ij).toString();
-							String courses = course.get(ij).toString();
-							String phones = phoneNum.get(ij).toString();
-
-							tbl.addCell(fnames);
-							tbl.addCell(courses);
-							tbl.addCell(studids);
-							tbl.addCell(pcodes);
-							tbl.addCell(pavails);
-							tbl.addCell(emails);
-							tbl.addCell(phones);
-						}
-						docs.add(tbl);
-						printed = true;
-						docs.close();
-					} catch (FileNotFoundException exs) {
-						System.out.println("Error " + exs);
-					} catch (DocumentException exss) {
-						System.out.println("Error " + exss);
-					}
+					printPdf.printThis(pdfFileName,fName, studentID,email,permitCode,permitAvailability,course,phoneNum);
+					printed = true;
 				}
 			}
 
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				lblNewLabel_5.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\hover-pdf.png"));
-			}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		lblNewLabel_5.setIcon(new ImageIcon(
+				"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\hover-pdf.png"));
+	}
 
-			@Override
+	@Override
 			public void mouseExited(MouseEvent e) {
 				lblNewLabel_5.setIcon(new ImageIcon(
 						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\pdf.png"));
@@ -636,6 +582,7 @@ public class mainUI {
 					studCounts.setForeground(Color.BLACK);
 					fnameText.setBackground(Color.WHITE);
 					studidTxt.setBackground(Color.WHITE);
+					coursecomboBox.setForeground(Color.BLACK);
 					coursecomboBox.setBackground(Color.WHITE);
 					phoneText.setBackground(Color.WHITE);
 					emailText.setBackground(Color.WHITE);
@@ -663,6 +610,8 @@ public class mainUI {
 					imagelabel.setForeground(Color.WHITE);
 					table_1.setForeground(Color.WHITE);
 					studCounts.setForeground(Color.WHITE);
+					coursecomboBox.setForeground(Color.WHITE);
+					coursecomboBox.setBackground(Color.decode("#657786"));
 					fnameText.setBackground(Color.decode("#657786"));
 					studidTxt.setBackground(Color.decode("#657786"));
 					coursecomboBox.setBackground(Color.decode("#657786"));
