@@ -498,18 +498,19 @@ public class mainUI {
 						pdfFileName = "";
 					}
 				} else {
-					printPdf.printThis(pdfFileName,fName, studentID,email,permitCode,permitAvailability,course,phoneNum);
+					printPdf.printThis(pdfFileName, fName, studentID, email, permitCode, permitAvailability, course,
+							phoneNum);
 					printed = true;
 				}
 			}
 
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		lblNewLabel_5.setIcon(new ImageIcon(
-				"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\hover-pdf.png"));
-	}
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				lblNewLabel_5.setIcon(new ImageIcon(
+						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\hover-pdf.png"));
+			}
 
-	@Override
+			@Override
 			public void mouseExited(MouseEvent e) {
 				lblNewLabel_5.setIcon(new ImageIcon(
 						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\pdf.png"));
@@ -556,6 +557,12 @@ public class mainUI {
 					filepath.add(tempContainerFilePath);
 					printed = false;
 					idI++;
+					fnameText.setText("");
+					coursecomboBox.setSelectedIndex(0);
+					studidTxt.setText("");
+					emailText.setText("");
+					phoneText.setText("");
+					dateAvailability.setCalendar(null);
 				}
 			}
 		});
