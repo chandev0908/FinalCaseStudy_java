@@ -1,7 +1,5 @@
 package mainpack;
 
-import java.awt.EventQueue;
-
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,12 +15,16 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
+import javax.swing.UIManager;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import mainpack.SettingsDialog.SettingsDialogResponse;
 
@@ -50,10 +52,13 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.border.MatteBorder;
 import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class mainUI {
 
-	private JFrame frame;
+	JFrame frame;
 	private JTextField fnameText;
 	private JTextField emailText;
 	private JTextField phoneText;
@@ -78,26 +83,18 @@ public class mainUI {
 	public boolean darkMode = true;
 	public String pdfFileName = "";
 	private JTextField studidTxt;
-	public String[] colorarr = { "#15181c", "#000000" };
+	private JTextField textField;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					mainUI window = new mainUI();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
 	}
 
 	/**
 	 * Create the application.
+	 * 
+	 * @wbp.parser.entryPoint
 	 */
 	public mainUI() {
 		initialize();
@@ -106,12 +103,13 @@ public class mainUI {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
+	public void initialize() {
 		// Main Frame
 		frame = new JFrame();
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(mainUI.class.getResource("/mainpack/img/icon.png")));
 		frame.setMinimumSize(new Dimension(900, 650));
-		frame.setTitle("Student Permission Generator");
-		frame.setBounds(100, 100, 1036, 729);
+		frame.setTitle("Permit Distributor System");
+		frame.setBounds(100, 100, 1150, 710);
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -131,23 +129,43 @@ public class mainUI {
 			}
 		});
 		// Menubar for changing email
+
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
 
 		JMenu mnNewMenu = new JMenu("Options");
 		menuBar.add(mnNewMenu);
-		SettingsDialog dialog = new SettingsDialog(new SettingsDialogResponseImp());
 		JMenuItem mntmNewMenuItem = new JMenuItem("Settings");
 		mntmNewMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				SettingsDialog dialog = new SettingsDialog(new SettingsDialogResponseImp(), darkMode);
 				dialog.setVisible(true);
 			}
 		});
 		mnNewMenu.add(mntmNewMenuItem);
+		JMenuItem mntmNewMenuItem23131 = new JMenuItem("File Name");
+		mntmNewMenuItem23131.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				pdfFileName = JOptionPane.showInputDialog(null, "Input the pdf file name", "",
+						JOptionPane.WARNING_MESSAGE);
+				if (pdfFileName == null) {
+					pdfFileName = "";
+				}
+			}
+		});
+		mnNewMenu.add(mntmNewMenuItem23131);
 		JMenuItem mntmNewMenuItem234 = new JMenuItem("Dark Mode");
 		mntmNewMenuItem234.setBackground(Color.decode("#a4a4a4"));
 		mnNewMenu.add(mntmNewMenuItem234);
 
+		JMenuItem mntmNewMenuItem1231 = new JMenuItem("About");
+		mntmNewMenuItem1231.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				About abt = new About(darkMode);
+				abt.frame.setVisible(true);
+			}
+		});
+		mnNewMenu.add(mntmNewMenuItem1231);
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.decode("#14171A"));
 		frame.getContentPane().add(panel, BorderLayout.NORTH);
@@ -316,19 +334,6 @@ public class mainUI {
 		JButton attachBtn = new JButton("Add Image");
 		attachBtn.setBackground(Color.WHITE);
 		attachBtn.setBorder(new LineBorder(new Color(0, 0, 0)));
-		attachBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fs = new JFileChooser(new File("C:\\Users\\Christian Dev\\Downloads"));
-				fs.setDialogTitle("Add Image");
-				fs.setFileFilter(new FileNameExtensionFilter("Image", "jpg", "png"));
-				int result = fs.showOpenDialog(null);
-
-				if (result == JFileChooser.APPROVE_OPTION) {
-					tempContainerFile = fs.getSelectedFile();
-					tempContainerFilePath = tempContainerFile.getAbsolutePath();
-				}
-			}
-		});
 
 		JLabel imagelabel = new JLabel("Insert Image");
 		imagelabel.setForeground(Color.WHITE);
@@ -344,8 +349,7 @@ public class mainUI {
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-		lblNewLabel.setIcon(new ImageIcon(
-				"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\add.png"));
+		lblNewLabel.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/add.png")));
 		panel_3.add(lblNewLabel);
 
 		JLabel studCounts = new JLabel("Students Count: 0");
@@ -353,6 +357,23 @@ public class mainUI {
 		studCounts.setForeground(Color.WHITE);
 		panel_3.add(studCounts);
 
+		JLabel lblNewLabel_6 = new JLabel("");
+		lblNewLabel_6.setSize(new Dimension(115, 115));
+		panel.add(lblNewLabel_6);
+		attachBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fs = new JFileChooser();
+				fs.setDialogTitle("Add Image");
+				fs.setFileFilter(new FileNameExtensionFilter("Image", "jpg", "png"));
+				int result = fs.showOpenDialog(null);
+
+				if (result == JFileChooser.APPROVE_OPTION) {
+					tempContainerFile = fs.getSelectedFile();
+					tempContainerFilePath = tempContainerFile.getAbsolutePath();
+					lblNewLabel_6.setIcon(iconRescaler(tempContainerFilePath));
+				}
+			}
+		});
 		JPanel panel_1 = new JPanel();
 		frame.getContentPane().add(panel_1, BorderLayout.CENTER);
 		panel_1.setLayout(new GridLayout(0, 1, 0, 0));
@@ -367,6 +388,8 @@ public class mainUI {
 		table_1 = new JTable(tableModel);
 		table_1.setForeground(Color.WHITE);
 		table_1.setBackground(Color.BLACK);
+		TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(table_1.getModel());
+		table_1.setRowSorter(rowSorter);
 		table_1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -377,7 +400,7 @@ public class mainUI {
 					updator(tval, tcolumn, trow, table_1, fName, studentID, email, permitCode, permitAvailability,
 							course, phoneNum);
 				} catch (Exception ex) {
-					System.out.println("error: " + ex);
+					JOptionPane.showMessageDialog(null, "Error: " + ex);
 				}
 			}
 		});
@@ -392,11 +415,10 @@ public class mainUI {
 		JPanel panel_5 = new JPanel();
 		panel_5.setBackground(Color.decode("#14171A"));
 		panel_4.add(panel_5, "cell 0 0,alignx center,aligny center");
-		panel_5.setLayout(new GridLayout(5, 1, 5, 5));
+		panel_5.setLayout(new GridLayout(8, 1, 5, 5));
 
 		JLabel lblNewLabel_2 = new JLabel("");
-		lblNewLabel_2.setIcon(new ImageIcon(
-				"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\view.png"));
+		lblNewLabel_2.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/view.png")));
 		lblNewLabel_2.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -410,22 +432,19 @@ public class mainUI {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				lblNewLabel_2.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\hover-view.png"));
+				lblNewLabel_2.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/hover-view.png")));
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				lblNewLabel_2.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\view.png"));
+				lblNewLabel_2.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/view.png")));
 			}
 		});
 		panel_5.add(lblNewLabel_2);
 
 		JLabel lblNewLabel_1 = new JLabel("");
 
-		lblNewLabel_1.setIcon(new ImageIcon(
-				"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\delete.png"));
+		lblNewLabel_1.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/delete.png")));
 		panel_5.add(lblNewLabel_1);
 
 		JLabel lblNewLabel_3 = new JLabel("");
@@ -439,26 +458,49 @@ public class mainUI {
 					updator(tval, tcolumn, trow, table_1, fName, studentID, email, permitCode, permitAvailability,
 							course, phoneNum);
 					JOptionPane.showMessageDialog(null, "Updated Sucessfully");
-					System.out.println(course);
 				} catch (Exception jjs) {
-					System.out.println("Error: " + jjs);
+					JOptionPane.showMessageDialog(null, "Error: " + jjs);
 				}
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				lblNewLabel_3.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\hover-update.png"));
+				lblNewLabel_3.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/hover-update.png")));
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				lblNewLabel_3.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\update.png"));
+				lblNewLabel_3.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/update.png")));
 			}
 		});
-		lblNewLabel_3.setIcon(new ImageIcon(
-				"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\update.png"));
+
+		JLabel lblNewLabel_5_1 = new JLabel("");
+		lblNewLabel_5_1.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				lblNewLabel_5_1.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/Deleteall-hover.png")));
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				lblNewLabel_5_1.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/Deleteall.png")));
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					for (int i = 0; i < fName.size(); i++) {
+						tableModel.removeRow(0);
+					}
+					JOptionPane.showMessageDialog(null, "Successfully deleted all data");
+				} catch (Exception esdd) {
+					JOptionPane.showMessageDialog(null, "Error: " + esdd);
+				}
+			}
+		});
+		lblNewLabel_5_1.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/Deleteall.png")));
+		panel_5.add(lblNewLabel_5_1);
+		lblNewLabel_3.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/update.png")));
 		panel_5.add(lblNewLabel_3);
 
 		JLabel lblNewLabel_4 = new JLabel("");
@@ -473,18 +515,15 @@ public class mainUI {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				lblNewLabel_4.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\hover-email.png"));
+				lblNewLabel_4.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/hover-email.png")));
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				lblNewLabel_4.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\email.png"));
+				lblNewLabel_4.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/email.png")));
 			}
 		});
-		lblNewLabel_4.setIcon(new ImageIcon(
-				"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\email.png"));
+		lblNewLabel_4.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/email.png")));
 		panel_5.add(lblNewLabel_4);
 
 		JLabel lblNewLabel_5 = new JLabel("");
@@ -506,30 +545,82 @@ public class mainUI {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				lblNewLabel_5.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\hover-pdf.png"));
+				lblNewLabel_5.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/hover-pdf.png")));
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				lblNewLabel_5.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\pdf.png"));
+				lblNewLabel_5.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/pdf.png")));
 			}
 		});
-		lblNewLabel_5.setIcon(new ImageIcon(
-				"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\pdf.png"));
+		lblNewLabel_5.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/pdf.png")));
 		panel_5.add(lblNewLabel_5);
+
+		JLabel lblNewLabel_5_2 = new JLabel("");
+		lblNewLabel_5_2.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				lblNewLabel_5_2.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/Search-hover.png")));
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				lblNewLabel_5_2.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/Search.png")));
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String searchID = JOptionPane.showInputDialog(null, "Search for Student ID");
+				if (studentID.size() >= 1) {
+					System.out.println("hi");
+					for (int iss = 0; iss < fName.size(); iss++) {
+						if (searchID.equalsIgnoreCase(studentID.get(iss))) {
+							JOptionPane.showMessageDialog(null,
+									"Full Name: " + fName.get(iss) + "\n" + "Course: " + course.get(iss) + "\n"
+											+ "Student ID: " + studentID.get(iss) + "\n" + "Permit Code: "
+											+ permitCode.get(iss) + "\n" + "Permit Availability: "
+											+ permitAvailability.get(iss) + "\n" + "Email: " + email.get(iss) + "\n"
+											+ "Phone #: " + phoneNum.get(iss),
+									"Student Info", JOptionPane.PLAIN_MESSAGE, iconRescaler(filepath.get(iss)));
+						} else {
+							JOptionPane.showMessageDialog(null, "Cant find any " + searchID + " in List");
+						}
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "No Data yet");
+				}
+
+			}
+		});
+		lblNewLabel_5_2.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/Search.png")));
+		panel_5.add(lblNewLabel_5_2);
+
+		textField = new JTextField();
+		textField.setText("Search Filter");
+		textField.setSize(new Dimension(0, 10));
+		textField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				String textF = textField.getText();
+
+				if (textF.trim().length() == 0) {
+					rowSorter.setRowFilter(null);
+				} else {
+					rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + textF));
+				}
+			}
+		});
+		panel_5.add(textField);
+		textField.setColumns(10);
 		lblNewLabel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				lblNewLabel.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\addhover.png"));
+				lblNewLabel.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/addhover.png")));
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				lblNewLabel.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\add.png"));
+				lblNewLabel.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/add.png")));
 			}
 
 			@Override
@@ -563,6 +654,8 @@ public class mainUI {
 					emailText.setText("");
 					phoneText.setText("");
 					dateAvailability.setCalendar(null);
+					tempContainerFilePath = "";
+					lblNewLabel_6.setIcon(null);
 				}
 			}
 		});
@@ -588,11 +681,15 @@ public class mainUI {
 					table_1.setForeground(Color.BLACK);
 					studCounts.setForeground(Color.BLACK);
 					fnameText.setBackground(Color.WHITE);
+					fnameText.setForeground(Color.BLACK);
 					studidTxt.setBackground(Color.WHITE);
+					studidTxt.setForeground(Color.BLACK);
 					coursecomboBox.setForeground(Color.BLACK);
 					coursecomboBox.setBackground(Color.WHITE);
 					phoneText.setBackground(Color.WHITE);
 					emailText.setBackground(Color.WHITE);
+					phoneText.setForeground(Color.BLACK);
+					emailText.setForeground(Color.BLACK);
 					fnameText.setBorder(new MatteBorder(1, 1, 1, 1, Color.BLACK));
 					studidTxt.setBorder(new MatteBorder(1, 1, 1, 1, Color.BLACK));
 					phoneText.setBorder(new MatteBorder(1, 1, 1, 1, Color.BLACK));
@@ -618,6 +715,11 @@ public class mainUI {
 					table_1.setForeground(Color.WHITE);
 					studCounts.setForeground(Color.WHITE);
 					coursecomboBox.setForeground(Color.WHITE);
+					fnameText.setForeground(Color.WHITE);
+					studidTxt.setForeground(Color.WHITE);
+					coursecomboBox.setForeground(Color.WHITE);
+					emailText.setForeground(Color.WHITE);
+					phoneText.setForeground(Color.WHITE);
 					coursecomboBox.setBackground(Color.decode("#657786"));
 					fnameText.setBackground(Color.decode("#657786"));
 					studidTxt.setBackground(Color.decode("#657786"));
@@ -626,26 +728,27 @@ public class mainUI {
 					emailText.setBackground(Color.decode("#657786"));
 					darkMode = true;
 				}
+				UIManager.put("OptionPane.messageForeground", darkMode ? Color.WHITE : Color.BLACK);
+				UIManager.put("OptionPane.background", darkMode ? Color.decode("#14171A") : new Color(210, 210, 210));
+				UIManager.put("Panel.background", darkMode ? Color.decode("#14171A") : new Color(210, 210, 210));
 			}
 		});
 		lblNewLabel_1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				lblNewLabel_1.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\hover-delete.png"));
+				lblNewLabel_1.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/hover-delete.png")));
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				lblNewLabel_1.setIcon(new ImageIcon(
-						"C:\\Users\\Christian Dev\\Desktop\\Java\\tFCStudy\\FinalCaseStudy\\src\\mainpack\\img\\delete.png"));
+				lblNewLabel_1.setIcon(new ImageIcon(mainUI.class.getResource("/mainpack/img/delete.png")));
 			}
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
 					studentCounts--;
-					studCounts.setText("S");
+					studCounts.setText("Students Count: " + studentCounts);
 					int tablerow = table_1.getSelectedRow();
 					Object tableid = tableModel.getValueAt(tablerow, 0);
 					tableModel.removeRow(tablerow);

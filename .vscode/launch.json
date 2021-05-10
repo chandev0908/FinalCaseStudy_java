@@ -2,6 +2,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch launcher",
+            "request": "launch",
+            "mainClass": "mainpack.launcher",
+            "projectName": "FinalCaseStudy"
+        },
+        {
+            "type": "java",
+            "name": "Launch About",
+            "request": "launch",
+            "mainClass": "mainpack.About",
+            "projectName": "FinalCaseStudy"
+        },
+        {
+            "type": "java",
             "name": "Launch mainUI",
             "request": "launch",
             "mainClass": "mainpack.mainUI",
